@@ -27,13 +27,6 @@ module.exports = {
                 allowNull: false,
                 defaultValue: '',
             },
-            full_name: {
-                type: Sequelize.VIRTUAL,
-                allowNull: false,
-                get() {
-                    return `${this.first_name} ${this.last_name}`
-                },
-            },
             nickname: {
                 type: Sequelize.STRING,
                 allowNull: false,
