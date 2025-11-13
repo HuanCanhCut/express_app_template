@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "main": "dist/server.js",
     "scripts": {
-        "dev": "NODE_ENV=development tsx watch --watch-path=src --watch-path=. --watch-preserve-output src/server.ts",
+        "dev": "NODE_ENV=development npx nodemon",
         "build": "rimraf ./dist && tsc && tsc-alias",
         "start": "NODE_ENV=production node dist/server.js",
         "lint": "eslint .",
@@ -42,7 +42,7 @@
         "eslint-plugin-prettier": "^5.2.1",
         "eslint-plugin-simple-import-sort": "^12.1.1",
         "globals": "^15.9.0",
-        "nodemon": "^3.1.7",
+        "nodemon": "^3.1.11",
         "prettier": "^3.3.3",
         "rimraf": "^6.0.1",
         "sequelize-cli": "^6.6.3",
