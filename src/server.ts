@@ -11,6 +11,7 @@ import { Server } from 'socket.io'
 import 'express-async-errors'
 import './app/queue'
 import errorHandler from './app/errors/errorHandler'
+import setUserContextMiddleware from './app/middlewares/userContext'
 import * as database from './config/database/index'
 import serviceAccount from './config/firebase/serviceAccount'
 import { redisClient } from './config/redis'
@@ -19,7 +20,7 @@ import route from './routes/index'
 const app = express()
 const server = http.createServer(app)
 
-const allowedOrigins: string[] = ['https://digital-library.com', 'https://digital-library.huancanhcut.click']
+const allowedOrigins: string[] = ['https://domain1', 'https://domain2']
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -29,7 +30,7 @@ const corsOptions: cors.CorsOptions = {
         if (allowedOrigins.indexOf(origin) !== -1) {
             callback(null, true)
         } else {
-            callback(new Error('CORS blocked!'))
+            callback(null, false)
         }
     },
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -75,6 +76,8 @@ app.use(
 
 app.use(express.json())
 app.use(cookieParser())
+
+app.use(setUserContextMiddleware)
 
 route(app)
 socketIO(io)
