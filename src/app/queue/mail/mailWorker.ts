@@ -1,6 +1,7 @@
 import { Job, Worker } from 'bullmq'
 
-import sendVerificationCode from '../../helper/sendVerificationCode'
+import sendResetPassCode from '~/app/helper/mail/sendResetPassCode'
+import sendVerificationCode from '~/app/helper/mail/sendVerificationCode'
 import { connection } from '~/config/redis'
 import { QueueEnum } from '~/enum/queue'
 
@@ -9,22 +10,33 @@ interface MailData {
     code: number
 }
 
-// Khởi tạo worker để xử lý việc gửi mail
 const mailWorker = new Worker(
     QueueEnum.MAIL,
     async (job: Job<MailData>) => {
         try {
             switch (job.name) {
+                case QueueEnum.SEND_RESET_PASSWORD_CODE: {
+                    const { email, code } = job.data
+                    console.log(
+                        `\x1b[33m [Mail Worker] Processing job ${job.id}: sending reset password code to ${email} \x1b[0m`,
+                    )
+
+                    await sendResetPassCode({ email, code })
+
+                    console.log(`\x1b[33m [Mail Worker] Job ${job.id} sent reset password code to ${email} \x1b[0m`)
+                    return { success: true }
+                }
                 case QueueEnum.SEND_VERIFICATION_CODE: {
                     const { email, code } = job.data
+
                     console.log(
                         `\x1b[33m [Mail Worker] Processing job ${job.id}: sending verification code to ${email} \x1b[0m`,
                     )
 
-                    // Gọi hàm gửi email
                     await sendVerificationCode({ email, code })
 
                     console.log(`\x1b[33m [Mail Worker] Job ${job.id} sent verification code to ${email} \x1b[0m`)
+
                     return { success: true }
                 }
                 default:

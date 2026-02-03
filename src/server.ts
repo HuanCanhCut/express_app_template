@@ -1,26 +1,23 @@
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import express from 'express'
+import admin from 'firebase-admin'
+import http from 'http'
+
 import './config/env'
 import setupGlobalErrorHandling from './app/errors/globalError'
 setupGlobalErrorHandling()
-import cookieParser from 'cookie-parser'
-import cors from 'cors'
-import express, { Request, Response } from 'express'
-import admin from 'firebase-admin'
-import http from 'http'
-import { Server } from 'socket.io'
 
 import 'express-async-errors'
 import './app/queue'
-import errorHandler from './app/errors/errorHandler'
-import setUserContextMiddleware from './app/middlewares/userContext'
 import * as database from './config/database/index'
 import serviceAccount from './config/firebase/serviceAccount'
 import { redisClient } from './config/redis'
-import socketIO from './config/socket'
 import route from './routes/index'
 const app = express()
 const server = http.createServer(app)
 
-const allowedOrigins: string[] = ['https://domain1', 'https://domain2']
+const allowedOrigins: string[] = ['https://library.local', 'https://library.huanpenguin.click', 'http://localhost:3000']
 
 const corsOptions: cors.CorsOptions = {
     origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
@@ -41,20 +38,6 @@ const corsOptions: cors.CorsOptions = {
 }
 
 app.use(cors(corsOptions))
-
-const io = new Server(server, {
-    cors: {
-        origin: function (origin, callback) {
-            if (!origin) return callback(null, true)
-            if (allowedOrigins.includes(origin)) {
-                callback(null, true)
-            } else {
-                callback(new Error('CORS not allowed by server'))
-            }
-        },
-        credentials: true,
-    },
-})
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount as admin.ServiceAccount),
@@ -77,19 +60,11 @@ app.use(
 app.use(express.json())
 app.use(cookieParser())
 
-app.use(setUserContextMiddleware)
+// make express trust the proxy of the load balancer (nginx)
+// so that we can get the correct protocol and host from the request
+app.set('trust proxy', true)
 
 route(app)
-socketIO(io)
-
-app.all('*', (req: Request, res: Response) => {
-    res.status(404).json({
-        status: 404,
-        message: `Can't find ${req.originalUrl} on this server!`,
-    })
-})
-
-app.use(errorHandler)
 
 server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`)

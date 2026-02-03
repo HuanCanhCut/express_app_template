@@ -27,9 +27,10 @@ module.exports = {
                 allowNull: false,
                 defaultValue: '',
             },
-            nickname: {
+            academic_degree: {
                 type: Sequelize.STRING,
-                allowNull: false,
+                allowNull: true,
+                defaultValue: null,
             },
             uuid: {
                 type: Sequelize.STRING,
@@ -38,6 +39,7 @@ module.exports = {
             email: {
                 type: Sequelize.STRING,
                 allowNull: false,
+                unique: true,
                 validate: {
                     isEmail: true,
                 },
@@ -47,15 +49,25 @@ module.exports = {
                 allowNull: false,
                 defaultValue: '',
             },
-            cover_photo: {
-                type: Sequelize.STRING,
-                allowNull: false,
-                defaultValue: '',
-            },
             password: {
                 type: Sequelize.TEXT,
                 allowNull: false,
                 defaultValue: '',
+            },
+            role: {
+                type: Sequelize.ENUM('teacher', 'student'),
+                allowNull: false,
+                defaultValue: 'student',
+            },
+            is_active: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: true,
+            },
+            is_blocked: {
+                type: Sequelize.BOOLEAN,
+                allowNull: false,
+                defaultValue: false,
             },
             created_at: {
                 type: Sequelize.DATE,

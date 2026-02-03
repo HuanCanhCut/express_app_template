@@ -1,6 +1,7 @@
 import { sequelize } from '../../config/database'
 import associations from './association'
 import handleChildrenAfterFindHook from './hooks/childrenAfterFindHook'
+import RefreshToken from './RefreshTokenModel'
 import User from './UserModel'
 
 associations()
@@ -16,4 +17,4 @@ sequelize
 sequelize.addHook('afterFind', handleChildrenAfterFindHook)
 
 // Export all models
-export { User }
+export { RefreshToken, User }

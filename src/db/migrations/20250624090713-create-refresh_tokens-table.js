@@ -26,7 +26,7 @@ module.exports = {
                 onUpdate: 'CASCADE',
             },
             refresh_token: {
-                type: Sequelize.TEXT,
+                type: Sequelize.STRING(512),
                 allowNull: false,
             },
             created_at: {
@@ -39,6 +39,10 @@ module.exports = {
                 allowNull: false,
                 defaultValue: Sequelize.literal('CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP'),
             },
+        })
+
+        await queryInterface.addIndex('refresh_tokens', ['user_id', 'refresh_token'], {
+            name: 'refresh_token_idx',
         })
     },
 

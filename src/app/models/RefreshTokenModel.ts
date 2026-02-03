@@ -16,19 +16,14 @@ RefreshToken.init(
             type: DataTypes.INTEGER,
             primaryKey: true,
             autoIncrement: true,
+            allowNull: false,
         },
         user_id: {
             type: DataTypes.INTEGER,
             allowNull: false,
-            references: {
-                model: 'users',
-                key: 'id',
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
         },
         refresh_token: {
-            type: DataTypes.TEXT,
+            type: DataTypes.STRING(512),
             allowNull: false,
         },
     },
