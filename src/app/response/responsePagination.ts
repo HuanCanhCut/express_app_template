@@ -16,6 +16,10 @@ interface ResponsePaginationBase {
 
 type ResponsePagination<T extends Record<string, unknown> = Record<string, unknown>> = ResponsePaginationBase & T
 
+export const responseData = <T>(data: T) => ({
+    data,
+})
+
 export const responsePagination = <T extends Record<string, unknown>>({
     req,
     data,
