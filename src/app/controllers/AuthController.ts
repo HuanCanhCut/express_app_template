@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from 'express'
 
-import { BadRequestError, NotFoundError, UnauthorizedError } from '../errors/errors'
+import { BadRequestError, ForBiddenError, NotFoundError, UnauthorizedError } from '../errors/errors'
 import { RefreshToken } from '../models'
 import AuthService from '../services/AuthService'
 import { clearCookie, setCookie } from '../utils/cookiesManager'
 import {
+    ChangePasswordRequest,
     LoginRequest,
     LoginWithTokenRequest,
     RegisterRequest,
@@ -169,6 +170,10 @@ class AuthController {
 
             const user = await User.findOne({ where: { email }, attributes: ['is_active'] })
 
+            if (user?.is_blocked) {
+                return next(new ForBiddenError({ message: 'Tài khoản đã bị chặn' }))
+            }
+
             if (user?.is_active) {
                 return next(new BadRequestError({ message: 'Tài khoản đã được xác thực' }))
             }
@@ -246,6 +251,21 @@ class AuthController {
             const payload = await AuthService.verifyAuthChallengeId({ auth_challenge_id, email: email as string })
 
             res.json({ data: payload })
+        } catch (error) {
+            return next(error)
+        }
+    }
+
+    // [PATCH] /auth/change-password
+    changePassword = async (req: ChangePasswordRequest, res: Response, next: NextFunction) => {
+        try {
+            const { password, new_password } = req.body
+
+            const decoded = req.decoded
+
+            await AuthService.changePassword({ currentUserId: decoded.sub, password, new_password })
+
+            res.json({ message: 'Password changed successfully' })
         } catch (error) {
             return next(error)
         }

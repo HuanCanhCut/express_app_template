@@ -20,11 +20,11 @@ jobs:
                   script: |
                       export NVM_DIR="$HOME/.nvm"
                       [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+                      set -e
                       cd /var/www/nodejs/digital_library_api/
                       git checkout production
                       git pull
                       yarn install --frozen-lockfile
                       yarn migrate:prod
-                      yarn seed:prod
                       yarn build
                       pm2 restart library-api

@@ -4,6 +4,10 @@ interface Message {
     message: string
 }
 
+interface ErrorProps extends Message {
+    error?: any
+}
+
 class AppError extends Error {
     statusCode: number
     error: any
@@ -33,8 +37,8 @@ class UnauthorizedError extends AppError {
 
 // 403: ForBidden
 class ForBiddenError extends AppError {
-    constructor({ message = ReasonPhrases.FORBIDDEN }: Message) {
-        super(message, StatusCodes.FORBIDDEN)
+    constructor({ message = ReasonPhrases.FORBIDDEN, error = {} }: ErrorProps) {
+        super(message, StatusCodes.FORBIDDEN, error)
     }
 }
 
@@ -50,10 +54,6 @@ class ConflictError extends AppError {
     constructor({ message = ReasonPhrases.CONFLICT }: Message) {
         super(message, StatusCodes.CONFLICT)
     }
-}
-
-interface ErrorProps extends Message {
-    error?: any
 }
 
 // 422: Unprocessable Entity

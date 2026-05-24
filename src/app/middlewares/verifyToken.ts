@@ -1,6 +1,7 @@
 import { NextFunction } from 'express'
 import jwt from 'jsonwebtoken'
 
+import { User } from '../models'
 import { clearCookie } from '../utils/cookiesManager'
 import redisClient from '~/config/redis/redisClient'
 import { IRequest } from '~/type'
@@ -22,6 +23,17 @@ const verifyToken = async (req: IRequest, res: any, next: NextFunction) => {
 
         try {
             const decoded = jwt.verify(access_token, process.env.JWT_SECRET as string)
+
+            const user = await User.findByPk(Number(decoded.sub))
+
+            if (user?.is_blocked) {
+                clearCookie({ res, cookies: ['access_token', 'refresh_token'], req })
+
+                return res.status(401).json({
+                    message: 'Tài khoản của bạn đã bị chặn.',
+                    status: 401,
+                })
+            }
 
             req.decoded = decoded
 

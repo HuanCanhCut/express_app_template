@@ -52,6 +52,13 @@ export const verifyAuthChallengeIdSchema = z.object({
     }),
 })
 
+export const changePasswordSchema = z.object({
+    body: z.object({
+        password: z.string().optional(),
+        new_password: passwordSchema,
+    }),
+})
+
 export type RegisterRequest = TypedRequest<z.infer<typeof registerSchema>['body']>
 export type LoginRequest = TypedRequest<z.infer<typeof loginSchema>['body']>
 export type LoginWithTokenRequest = TypedRequest<z.infer<typeof loginWithTokenSchema>['body']>
@@ -59,6 +66,7 @@ export type SendVerifyCodeRequest = TypedRequest<z.infer<typeof sendVerifyCodeSc
 export type SendResetPassCodeRequest = TypedRequest<z.infer<typeof sendResetPassCodeSchema>['body']>
 export type ResetPassRequest = TypedRequest<z.infer<typeof resetPassSchema>['body']>
 export type VerifyAccountRequest = TypedRequest<z.infer<typeof verifyAccountSchema>['body']>
+export type ChangePasswordRequest = TypedRequest<z.infer<typeof changePasswordSchema>['body']>
 
 export type VerifyAuthChallengeIdRequest = TypedRequest<
     any,

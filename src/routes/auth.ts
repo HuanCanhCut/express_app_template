@@ -4,6 +4,7 @@ const router = express.Router()
 import AuthController from '../app/controllers/AuthController'
 import { validate } from '../app/middlewares/validate'
 import {
+    changePasswordSchema,
     loginSchema,
     loginWithTokenSchema,
     registerSchema,
@@ -13,6 +14,7 @@ import {
     verifyAccountSchema,
     verifyAuthChallengeIdSchema,
 } from '../app/validators/api/authSchema'
+import verifyToken from '~/app/middlewares/verifyToken'
 
 router.post('/register', validate(registerSchema), AuthController.register)
 router.post('/login', validate(loginSchema), AuthController.login)
@@ -28,5 +30,6 @@ router.get(
 )
 router.post('/forgot-password', validate(sendResetPassCodeSchema), AuthController.sendResetPassCode)
 router.post('/reset-password', validate(resetPassSchema), AuthController.resetPassword)
+router.post('/change-password', verifyToken, validate(changePasswordSchema), AuthController.changePassword)
 
 export default router

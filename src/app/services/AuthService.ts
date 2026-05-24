@@ -7,8 +7,11 @@ import { v4 as uuidv4 } from 'uuid'
 
 import {
     AppError,
+    BadRequestError,
     ConflictError,
+    ForBiddenError,
     InternalServerError,
+    NotFoundError,
     UnauthorizedError,
     UnprocessableEntityError,
 } from '../errors/errors'
@@ -133,6 +136,15 @@ class AuthServices {
                 throw new UnauthorizedError({ message: 'Email hoặc mật khẩu không chính xác' })
             }
 
+            if (user.is_blocked) {
+                throw new ForBiddenError({
+                    message: `Tài khoản đã bị chặn. Lý do: ${user.block_reason}. Nếu bạn không đồng ý với quyết định này, bạn có thể kháng cáo`,
+                    error: {
+                        status: 'IS_BLOCKED',
+                    },
+                })
+            }
+
             const isPasswordValid = bcrypt.compareSync(password, user.get('password')!)
 
             if (!isPasswordValid) {
@@ -235,6 +247,10 @@ class AuthServices {
                 },
             })
 
+            if (hasUser?.is_blocked) {
+                throw new ForBiddenError({ message: 'Tài khoản đã bị chặn' })
+            }
+
             if (!hasUser) {
                 const lastNickname = await this.getLastNickname(emailPrefix)
 
@@ -248,6 +264,7 @@ class AuthServices {
                     nickname,
                     uuid: uuidv4(),
                     avatar: picture,
+                    academic_degree: 'Sinh viên',
                     role: 'student',
                     is_active: true,
                     is_blocked: false,
@@ -346,6 +363,16 @@ class AuthServices {
 
     sendVerifyCode = async ({ email, type }: { email: string; type: 'activate_account' | 'reset_password' }) => {
         try {
+            const user = await User.findOne({ where: { email }, attributes: ['is_active', 'is_blocked'] })
+
+            if (!user) {
+                throw new NotFoundError({ message: 'Không tìm thấy tài khoản' })
+            }
+
+            if (user.is_blocked) {
+                throw new ForBiddenError({ message: 'Tài khoản đã bị chặn' })
+            }
+
             // 6 number
             const resetCode = Math.floor(100000 + Math.random() * 900000)
 
@@ -423,6 +450,10 @@ class AuthServices {
                 throw new UnauthorizedError({ message: 'Email hoặc mã xác minh không hợp lệ' })
             }
 
+            if (user.is_blocked) {
+                throw new ForBiddenError({ message: 'Tài khoản đã bị chặn' })
+            }
+
             if (user.is_active) {
                 throw new UnauthorizedError({ message: 'Tài khoản đã được xác thực' })
             }
@@ -462,6 +493,54 @@ class AuthServices {
             }
 
             return payloadData
+        } catch (error: any) {
+            if (error instanceof AppError) {
+                throw error
+            }
+
+            throw new InternalServerError({ message: error.message })
+        }
+    }
+
+    changePassword = async ({
+        currentUserId,
+        password,
+        new_password,
+    }: {
+        currentUserId: number
+        password?: string
+        new_password: string
+    }) => {
+        try {
+            const user = await User.scope('withPassword').findByPk(currentUserId)
+
+            if (!user) {
+                throw new UnauthorizedError({ message: 'User not found' })
+            }
+
+            let isPasswordValid = false
+
+            if (user.password && password) {
+                isPasswordValid = await bcrypt.compare(password, user.password)
+            }
+
+            // if use login with token (google, ...), password is empty string
+            if (user.password?.trim() === '') {
+                isPasswordValid = true
+            }
+
+            if (!isPasswordValid) {
+                throw new UnauthorizedError({ message: 'Mật khẩu hiện tại không chính xác' })
+            }
+
+            if (password === new_password) {
+                throw new BadRequestError({ message: 'Mật khẩu mới phải khác mật khẩu hiện tại' })
+            }
+
+            const newPasswordHashed = await hashValue(new_password)
+
+            user.set('password', newPasswordHashed)
+            await user.save()
         } catch (error: any) {
             if (error instanceof AppError) {
                 throw error

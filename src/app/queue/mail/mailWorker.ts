@@ -7,7 +7,10 @@ import { QueueEnum } from '~/enum/queue'
 
 interface MailData {
     email: string
-    code: number
+    code?: number
+    reason?: string
+    fullName?: string
+    content?: string
 }
 
 const mailWorker = new Worker(
@@ -21,7 +24,7 @@ const mailWorker = new Worker(
                         `\x1b[33m [Mail Worker] Processing job ${job.id}: sending reset password code to ${email} \x1b[0m`,
                     )
 
-                    await sendResetPassCode({ email, code })
+                    await sendResetPassCode({ email, code: code! })
 
                     console.log(`\x1b[33m [Mail Worker] Job ${job.id} sent reset password code to ${email} \x1b[0m`)
                     return { success: true }
@@ -33,7 +36,7 @@ const mailWorker = new Worker(
                         `\x1b[33m [Mail Worker] Processing job ${job.id}: sending verification code to ${email} \x1b[0m`,
                     )
 
-                    await sendVerificationCode({ email, code })
+                    await sendVerificationCode({ email, code: code! })
 
                     console.log(`\x1b[33m [Mail Worker] Job ${job.id} sent verification code to ${email} \x1b[0m`)
 

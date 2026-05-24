@@ -24,15 +24,17 @@ export const clearCookie = ({ res, cookies = [], path = '/', req }: IClearCookie
     const hostname = origin ? new URL(origin).hostname : undefined
     const domain = hostname ? `.${getParentDomain(hostname)}` : undefined
 
+    const isProduction = process.env.NODE_ENV === 'production' && domain !== '.localhost'
+
     for (const cookie of cookies) {
         res.cookie(cookie, '', {
             httpOnly: true,
             path,
-            sameSite: 'none',
+            sameSite: isProduction ? 'strict' : 'none',
             secure: true,
             partitioned: true,
             maxAge: 0,
-            domain: process.env.NODE_ENV === 'production' && domain !== '.localhost' ? domain : undefined,
+            domain: isProduction ? domain : undefined,
         })
     }
 }
@@ -49,14 +51,17 @@ export const setCookie = ({ res, cookies = [], path = '/', req }: ISetCookie) =>
     const hostname = origin ? new URL(origin).hostname : undefined
     const domain = hostname ? `.${getParentDomain(hostname)}` : undefined
 
+    const isProduction = process.env.NODE_ENV === 'production' && domain !== '.localhost'
+
     for (const cookie of cookies) {
         res.cookie(cookie.name, cookie.value, {
             httpOnly: true,
             path,
-            sameSite: 'none',
+            sameSite: isProduction ? 'strict' : 'none',
             secure: true,
             partitioned: true,
-            domain: process.env.NODE_ENV === 'production' && domain !== '.localhost' ? domain : undefined,
+            domain: isProduction ? domain : undefined,
+            maxAge: Number(process.env.EXPIRED_REFRESH_TOKEN) * 1000, // mặc định, max-age tính theo ms => * 1000
         })
     }
 }

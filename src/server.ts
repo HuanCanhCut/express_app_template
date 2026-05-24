@@ -13,7 +13,10 @@ import './app/queue'
 import * as database from './config/database/index'
 import serviceAccount from './config/firebase/serviceAccount'
 import { redisClient } from './config/redis'
+import SocketConfig from './config/socket/index'
 import route from './routes/index'
+import setupSocketConnection from './socket'
+
 const app = express()
 const server = http.createServer(app)
 
@@ -65,6 +68,10 @@ app.use(cookieParser())
 app.set('trust proxy', true)
 
 route(app)
+const io = SocketConfig.init(server, allowedOrigins)
+
+// setup socket connection
+setupSocketConnection(io)
 
 server.listen(process.env.PORT, () => {
     console.log(`Server is running on port ${process.env.PORT}`)

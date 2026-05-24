@@ -45,7 +45,7 @@ const sendResetPassCode = ({ email, code }: { email: string; code: number }) => 
                                     <h1 style="margin: 0 0 20px; font-size: 24px; font-weight: 700; color: #1a1a1a;">Xác minh tài khoản</h1>
                                     
                                     <p style="margin: 0 0 30px; line-height: 1.6; color: #555; font-size: 16px;">
-                                        Chào mừng bạn đến với phần mềm quản lí sinh viên" style="color: #ff2056; text-decoration: none;"><strong>Thư viện số</strong></a>. Vui lòng sử dụng mã xác minh dưới đây để hoàn tất đăng ký.
+                                        Chào mừng bạn đến với <a href="${process.env.ORIGIN_URL}" style="color: #ff2056; text-decoration: none;"><strong>...</strong></a>. Vui lòng sử dụng mã xác minh dưới đây để hoàn tất đăng ký.
                                         <br>Mã này sẽ hết hạn trong <strong>${formatDuration(Number(process.env.VERIFY_AUTH_TTL))}</strong>.
                                     </p>
 
@@ -64,6 +64,9 @@ const sendResetPassCode = ({ email, code }: { email: string; code: number }) => 
                                     <p style="margin: 0 0 10px; font-size: 12px; color: #888;">
                                         Email này được gửi tự động từ hệ thống.
                                     </p>
+                                    <a href="${process.env.ORIGIN_URL}" style="margin: 0; font-size: 14px; font-weight: 600; color: #ff2056; text-decoration: none;">
+                                        ...
+                                    </a>
                                 </div>
 
                             </div>
